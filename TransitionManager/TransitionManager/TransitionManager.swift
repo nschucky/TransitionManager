@@ -16,7 +16,7 @@ protocol TransitionManagerDelegate {
         fromViewController: UIViewController,
         toViewController: UIViewController,
         isDismissing: Bool,
-        duration: NSTimeInterval,
+        duration: TimeInterval,
         completion: () -> Void)
 
     /// Interactive transitions,
@@ -33,7 +33,7 @@ class TransitionManagerAnimation: NSObject, TransitionManagerDelegate {
         fromViewController: UIViewController,
         toViewController: UIViewController,
         isDismissing: Bool,
-        duration: NSTimeInterval,
+        duration: TimeInterval,
         completion: () -> Void) {
         completion()
     }
@@ -54,7 +54,7 @@ class TransitionManager: NSObject, UIViewControllerAnimatedTransitioning, UIView
 
     private var transitionAnimation: TransitionManagerAnimation!
     private var isDismissing: Bool = false
-    private var duration: NSTimeInterval = 0.30
+    private var duration: TimeInterval = 0.30
 
     // MARK: Lifecycle
 
@@ -64,12 +64,12 @@ class TransitionManager: NSObject, UIViewControllerAnimatedTransitioning, UIView
 
     // MARK: UIViewControllerAnimatedTransitioning
 
-    func animateTransition(transitionContext: UIViewControllerContextTransitioning) {
+    func animateTransition(_ transitionContext: UIViewControllerContextTransitioning) {
         let container = transitionContext.containerView()
-        let fromViewController = transitionContext.viewControllerForKey(UITransitionContextFromViewControllerKey)
-        let toViewController = transitionContext.viewControllerForKey(UITransitionContextToViewControllerKey)
+        let fromViewController = transitionContext.viewController(forKey: UITransitionContextFromViewControllerKey)
+        let toViewController = transitionContext.viewController(forKey: UITransitionContextToViewControllerKey)
         transitionAnimation.transition(
-        container!,
+        container: container,
         fromViewController: fromViewController!,
         toViewController: toViewController!,
         isDismissing: isDismissing,
@@ -79,43 +79,41 @@ class TransitionManager: NSObject, UIViewControllerAnimatedTransitioning, UIView
         })
     }
 
-    func transitionDuration(transitionContext: UIViewControllerContextTransitioning?) -> NSTimeInterval {
+    func transitionDuration(_ transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
         return duration
     }
 
     // MARK: UIViewControllerTransitioningDelegate
 
-    func animationControllerForPresentedController(
-        presented: UIViewController,
-        presentingController presenting: UIViewController,
+    func animationController(forPresentedController presented: UIViewController,
+                             presenting: UIViewController,
         sourceController source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
             isDismissing = false
             return self
     }
 
-    func animationControllerForDismissedController(dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+    func animationController(forDismissedController dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
             isDismissing = true
             return self
     }
 
-    func interactionControllerForPresentation(animator: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
+    func interactionController(forPresentation animator: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
         isDismissing = false
         return transitionAnimation.interactionTransitionController
     }
 
-    func interactionControllerForDismissal(animator: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
+    func interactionController(forDismissal animator: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
         isDismissing = true
         return transitionAnimation.interactionTransitionController
     }
 
     // MARK: UINavigationControllerDelegate
 
-    func navigationController(
-        navigationController: UINavigationController,
-        animationControllerForOperation operation: UINavigationControllerOperation,
-        fromViewController fromVC: UIViewController,
-        toViewController toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        if operation == .Pop {
+    func navigationController(_ navigationController: UINavigationController,
+                              animationControllerFor operation: UINavigationControllerOperation,
+                              from fromVC: UIViewController,
+                              to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        if operation == .pop {
             isDismissing = true
         } else {
             isDismissing = false
@@ -123,9 +121,8 @@ class TransitionManager: NSObject, UIViewControllerAnimatedTransitioning, UIView
         return self
     }
 
-    func navigationController(
-        navigationController: UINavigationController,
-        interactionControllerForAnimationController animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
+    func navigationController(_ navigationController: UINavigationController,
+        interactionControllerFor animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
         return transitionAnimation.interactionTransitionController
     }
 }

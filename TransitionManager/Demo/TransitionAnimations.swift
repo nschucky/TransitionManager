@@ -11,14 +11,14 @@ import UIKit
 // MARK: TransitionManager Extension
 
 enum TransitionManagerAnimations {
-    case Fade
-    case Pull
+    case fade
+    case pull
     
     func transitionAnimation () -> TransitionManagerAnimation {
         switch self {
-        case .Fade:
+        case .fade:
             return FadeTransitionAnimation()
-        case .Pull:
+        case .pull:
             return PullTransitionAnimation()
         }
     }
@@ -38,16 +38,16 @@ class FadeTransitionAnimation: TransitionManagerAnimation {
         fromViewController: UIViewController,
         toViewController: UIViewController,
         isDismissing: Bool,
-        duration: NSTimeInterval,
+        duration: TimeInterval,
         completion: () -> Void) {
         if isDismissing {
-            closeAnimation(container,
+            closeAnimation(container: container,
                 fromViewController: fromViewController,
                 toViewController: toViewController,
                 duration: duration,
                 completion: completion)
         } else {
-            openAnimation(container,
+            openAnimation(container: container,
                 fromViewController: fromViewController,
                 toViewController: toViewController,
                 duration: duration,
@@ -59,11 +59,11 @@ class FadeTransitionAnimation: TransitionManagerAnimation {
         container: UIView,
         fromViewController: UIViewController,
         toViewController: UIViewController,
-        duration: NSTimeInterval,
+        duration: TimeInterval,
         completion: () -> Void) {
         toViewController.view.alpha = 0
         container.addSubview(toViewController.view)
-        UIView.animateWithDuration(duration,
+        UIView.animate(withDuration: duration,
             animations: {
                 toViewController.view.alpha = 1
             }, completion: {
@@ -77,11 +77,11 @@ class FadeTransitionAnimation: TransitionManagerAnimation {
         container: UIView,
         fromViewController: UIViewController,
         toViewController: UIViewController,
-        duration: NSTimeInterval,
+        duration: TimeInterval,
         completion: () -> Void) {
         container.addSubview(toViewController.view)
-        container.bringSubviewToFront(fromViewController.view)
-        UIView.animateWithDuration(duration,
+        container.bringSubview(toFront: fromViewController.view)
+        UIView.animate(withDuration: duration,
             animations: {
                 fromViewController.view.alpha = 0
             }, completion: {
@@ -101,16 +101,16 @@ class PullTransitionAnimation: TransitionManagerAnimation {
         fromViewController: UIViewController,
         toViewController: UIViewController,
         isDismissing: Bool,
-        duration: NSTimeInterval,
+        duration: TimeInterval,
         completion: () -> Void) {
         if isDismissing {
-            closeAnimation(container,
+            closeAnimation(container: container,
                 fromViewController: fromViewController,
                 toViewController: toViewController,
                 duration: duration,
                 completion: completion)
         } else {
-            openAnimation(container,
+            openAnimation(container: container,
                 fromViewController: fromViewController,
                 toViewController: toViewController,
                 duration: duration,
@@ -122,13 +122,13 @@ class PullTransitionAnimation: TransitionManagerAnimation {
         container: UIView,
         fromViewController: UIViewController,
         toViewController: UIViewController,
-        duration: NSTimeInterval,
+        duration: TimeInterval,
         completion: () -> Void) {
         container.addSubview(toViewController.view)
         toViewController.view.top = fromViewController.view.bottom
-        toViewController.view.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: "handlePan:"))
+        toViewController.view.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(PullTransitionAnimation.handlePan(pan:))))
         panningViewController = toViewController
-        UIView.animateWithDuration(duration,
+        UIView.animate(withDuration: duration,
             animations: {
                 toViewController.view.top = 0
             }, completion: {
@@ -141,11 +141,11 @@ class PullTransitionAnimation: TransitionManagerAnimation {
         container: UIView,
         fromViewController: UIViewController,
         toViewController: UIViewController,
-        duration: NSTimeInterval,
+        duration: TimeInterval,
         completion: () -> Void) {
         container.addSubview(toViewController.view)
-        container.bringSubviewToFront(fromViewController.view)
-        UIView.animateWithDuration(duration,
+        container.bringSubview(toFront: fromViewController.view)
+        UIView.animate(withDuration: duration,
             animations: {
                 fromViewController.view.top = toViewController.view.bottom
             }, completion: {
@@ -155,21 +155,21 @@ class PullTransitionAnimation: TransitionManagerAnimation {
     }
 
     func handlePan(pan: UIPanGestureRecognizer) {
-        let percent = pan.translationInView(pan.view!).y / pan.view!.bounds.size.height
+        let percent = pan.translation(in: pan.view!).y / pan.view!.bounds.size.height
         switch pan.state {
-        case .Began:
+        case .began:
             interactionTransitionController = UIPercentDrivenInteractiveTransition()
-            panningViewController?.dismissViewControllerAnimated(true, completion: {
-                self.interactionTransitionController?.finishInteractiveTransition()
+            panningViewController?.dismiss(animated: true, completion: {
+                self.interactionTransitionController?.finish()
             })
-        case .Changed:
-            interactionTransitionController!.updateInteractiveTransition(percent)
-        case .Ended:
+        case .changed:
+            interactionTransitionController!.update(percent)
+        case .ended:
             if percent > 0.5 {
-                interactionTransitionController!.finishInteractiveTransition()
+                interactionTransitionController!.finish()
                 panningViewController = nil
             } else {
-                interactionTransitionController!.cancelInteractiveTransition()
+                interactionTransitionController!.cancel()
             }
             interactionTransitionController = nil
         default:

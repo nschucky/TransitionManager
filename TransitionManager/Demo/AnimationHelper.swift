@@ -120,21 +120,21 @@ extension UIView {
     func setRotationX (x: CGFloat) {
         var transform = CATransform3DIdentity
         transform.m34 = 1.0 / -1000.0
-        transform = CATransform3DRotate(transform, degreesToRadians(x), 1.0, 0.0, 0.0)
+        transform = CATransform3DRotate(transform, degreesToRadians(angle: x), 1.0, 0.0, 0.0)
         self.layer.transform = transform
     }
     
     func setRotationY (y: CGFloat) {
         var transform = CATransform3DIdentity
         transform.m34 = 1.0 / -1000.0
-        transform = CATransform3DRotate(transform, degreesToRadians(y), 0.0, 1.0, 0.0)
+        transform = CATransform3DRotate(transform, degreesToRadians(angle: y), 0.0, 1.0, 0.0)
         self.layer.transform = transform
     }
     
     func setRotationZ (z: CGFloat) {
         var transform = CATransform3DIdentity
         transform.m34 = 1.0 / -1000.0
-        transform = CATransform3DRotate(transform, degreesToRadians(z), 0.0, 0.0, 1.0)
+        transform = CATransform3DRotate(transform, degreesToRadians(angle: z), 0.0, 0.0, 1.0)
         self.layer.transform = transform
     }
     
@@ -144,9 +144,9 @@ extension UIView {
         z: CGFloat) {
         var transform = CATransform3DIdentity
         transform.m34 = 1.0 / -1000.0
-        transform = CATransform3DRotate(transform, degreesToRadians(x), 1.0, 0.0, 0.0)
-        transform = CATransform3DRotate(transform, degreesToRadians(y), 0.0, 1.0, 0.0)
-        transform = CATransform3DRotate(transform, degreesToRadians(z), 0.0, 0.0, 1.0)
+        transform = CATransform3DRotate(transform, degreesToRadians(angle: x), 1.0, 0.0, 0.0)
+        transform = CATransform3DRotate(transform, degreesToRadians(angle: y), 0.0, 1.0, 0.0)
+        transform = CATransform3DRotate(transform, degreesToRadians(angle: z), 0.0, 0.0, 1.0)
         self.layer.transform = transform
     }
     
@@ -162,7 +162,7 @@ extension UIView {
 
 // MARK: Animation Extensions
 
-let UIViewAnimationDuration: NSTimeInterval = 1
+let UIViewAnimationDuration: TimeInterval = 1
 let UIViewAnimationSpringDamping: CGFloat = 0.5
 let UIViewAnimationSpringVelocity: CGFloat = 0.5
 
@@ -171,29 +171,30 @@ extension UIView {
     func spring (
         animations: (()->Void),
         completion: ((Bool)->Void)? = nil) {
-        spring(UIViewAnimationDuration,
+        spring(duration: UIViewAnimationDuration,
             animations: animations,
             completion: completion)
     }
     
     func spring (
-        duration: NSTimeInterval,
+        duration: TimeInterval,
         animations: (()->Void),
         completion: ((Bool)->Void)? = nil) {
-        UIView.animateWithDuration(UIViewAnimationDuration,
+        UIView.animate(
+            withDuration: UIViewAnimationDuration,
             delay: 0,
             usingSpringWithDamping: UIViewAnimationSpringDamping,
             initialSpringVelocity: UIViewAnimationSpringVelocity,
-            options: UIViewAnimationOptions.AllowAnimatedContent,
+            options: UIViewAnimationOptions.allowAnimatedContent,
             animations: animations,
             completion: completion)
     }
     
     func animate (
-        duration: NSTimeInterval,
+        duration: TimeInterval,
         animations: (()->Void),
         completion: ((Bool)->Void)? = nil) {
-        UIView.animateWithDuration(duration,
+        UIView.animate(withDuration: duration,
             animations: animations,
             completion: completion)
     }
@@ -202,16 +203,16 @@ extension UIView {
         animations: (()->Void),
         completion: ((Bool)->Void)? = nil) {
         animate(
-            UIViewAnimationDuration,
+            duration: UIViewAnimationDuration,
             animations: animations,
             completion: completion)
     }
     
     func pop () {
-        setScale(1.1, y: 1.1)
-        spring(0.2,
+        setScale(x: 1.1, y: 1.1)
+        spring(duration: 0.2,
             animations: { [unowned self] in
-                self.setScale(1, y: 1)
+                self.setScale(x: 1, y: 1)
             })
     }
 }
@@ -221,11 +222,11 @@ extension UIView {
 
 extension UIView {
     func toImage () -> UIImage {
-        UIGraphicsBeginImageContextWithOptions(bounds.size, opaque, 0.0)
-        drawViewHierarchyInRect(bounds, afterScreenUpdates: false)
+        UIGraphicsBeginImageContextWithOptions(bounds.size, isOpaque, 0.0)
+        drawHierarchy(in: bounds, afterScreenUpdates: false)
         let img = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        return img
+        return img!
     }
 }
 
